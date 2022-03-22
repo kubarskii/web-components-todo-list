@@ -83,11 +83,13 @@ export default class TodoItemComponent extends HTMLElement {
 
         const self = this
 
-        deleteButton.addEventListener('click', function () {
+        deleteButton.addEventListener('click', function (e) {
+            e.stopPropagation()
             self.parent.delete(id)
         })
 
-        inProgressButton.addEventListener('click', function () {
+        inProgressButton.addEventListener('click', function (e) {
+            e.stopPropagation()
             const {status} = self.props
             if (status === 'IN_PROGRESS') {
                 self.setTodo()
@@ -96,7 +98,7 @@ export default class TodoItemComponent extends HTMLElement {
             }
         })
 
-        p.addEventListener('click', function () {
+        this.addEventListener('click', function () {
             const status = (self.props.status === 'DONE') ? 'TODO' : 'DONE'
             self.#updateStatus(status)
         })
