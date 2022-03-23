@@ -1,14 +1,23 @@
+import template from './templates/todo-item.template.html'
+import {getTemplateFromHtmlString} from '../../utils/index'
+
 export default class TodoItemComponent extends HTMLElement {
     constructor() {
         super();
         this.props = {}
         this.shadow = null
         this.parent = null
+        this.template = null
     }
 
     connectedCallback() {
         this.parent = this.parentNode.parentNode
+        this.loadTemplate()
         this.#init()
+    }
+
+    loadTemplate() {
+        this.template = getTemplateFromHtmlString(template);
     }
 
     setCancelled() {
@@ -37,75 +46,37 @@ export default class TodoItemComponent extends HTMLElement {
 
     #render() {
         const {text, id, status} = this.props
+
         const fragment = document.createDocumentFragment()
         this.shadow = this.attachShadow({mode: 'open'})
+        const taskContainer = document.createElement('span')
+        const buttonTitile = document.createElement('span')
 
-        const taskContainer = document.createElement('div')
-        const p = document.createElement('p')
-        const inProgressButton = document.createElement('button')
-        const deleteButton = document.createElement('button')
+        taskContainer.setAttribute('slot', 'task')
+        buttonTitile.setAttribute('slot', 'action-button')
 
-        p.innerText = text
-        deleteButton.textContent = 'Delete'
-        inProgressButton.textContent = (status === 'IN_PROGRESS') ? 'To Do' : 'In Progress'
+        taskContainer.textContent = text
+        buttonTitile.textContent = (status === 'IN_PROGRESS') ? 'To Do' : 'In Progress'
 
-        taskContainer.append(p)
-        taskContainer.append(deleteButton)
-        taskContainer.append(inProgressButton)
+        this.append(taskContainer)
+        this.append(buttonTitile)
 
-        const style = document.createElement('style')
-        style.textContent = `
-            :host {
-                user-select: none;
-                cursor: pointer;
-                display: flex;
-                flex-wrap: wrap;
-            }
-            
-            :host > div {
-                width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-            }
-            
-            :host p {
-                flex: 1
-            }
-            
-            :host([data-status="DONE"]) p {
-                text-decoration: line-through;
-            }
-            
-            :host([data-status="IN_PROGRESS"]) p {
-                color: blue;
-            }
-        `
-
-        const self = this
-
-        deleteButton.addEventListener('click', function (e) {
+        this.shadow.appendChild(this.template.content.cloneNode(true))
+        this.shadow.append(fragment)
+        this.shadow.querySelector('.action').addEventListener('click', (e) => {
             e.stopPropagation()
-            self.parent.delete(id)
-        })
-
-        inProgressButton.addEventListener('click', function (e) {
-            e.stopPropagation()
-            const {status} = self.props
+            const {status} = this.props
             if (status === 'IN_PROGRESS') {
-                self.setTodo()
+                this.setTodo()
             } else {
-                self.setInProgress()
+                this.setInProgress()
             }
         })
 
-        this.addEventListener('click', function () {
-            const status = (self.props.status === 'DONE') ? 'TODO' : 'DONE'
-            self.#updateStatus(status)
+        this.shadow.querySelector('.delete').addEventListener('click', (e) => {
+            e.stopPropagation()
+            this.parent.delete(id)
         })
-
-        fragment.append(taskContainer)
-        this.shadow.appendChild(style)
-        this.shadow.appendChild(fragment)
     }
 
     #init() {

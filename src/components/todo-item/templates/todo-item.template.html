@@ -1,0 +1,18 @@
+<style>
+    .row {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+<li class="row">
+    <p>
+        <slot name="task">No task content passed</slot>
+    </p>
+    <button class="delete">Delete</button>
+    <button class="action">
+        <slot name="action-button">Provide button name</slot>
+    </button>
+</li>
