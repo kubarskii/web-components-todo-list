@@ -12,7 +12,9 @@ const config = {
     output: {
         filename: "index.js",
         path: path.resolve(__dirname, "dist"),
-        libraryTarget: "umd2"
+        libraryTarget: "umd",
+        asyncChunks: true,
+        chunkFilename: '[id].js',
     },
     devServer: {
         static: {

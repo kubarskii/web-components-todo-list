@@ -1,7 +1,8 @@
-import TodoListComponent from './components/todo-list/todo-list.component';
-import TodoHeadingComponent from './components/todo-heading/todo-heading.component';
-import TodoItemComponent from './components/todo-item/todo-item.component';
-
-customElements.define('todo-list', TodoListComponent)
-customElements.define('todo-heading', TodoHeadingComponent)
-customElements.define('todo-item', TodoItemComponent)
+import('./components/todo-list/todo-list.component')
+    .then(async (TodoListComponent) => {
+        customElements.define('todo-list', TodoListComponent.default)
+        const TodoHeadingComponent = await import('./components/todo-heading/todo-heading.component')
+        customElements.define('todo-heading', TodoHeadingComponent.default)
+        const TodoItemComponent = await import('./components/todo-item/todo-item.component')
+        customElements.define('todo-item', TodoItemComponent.default)
+    })
