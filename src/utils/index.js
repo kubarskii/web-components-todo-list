@@ -1,1 +1,0 @@
-export {getTemplateFromHtmlString} from './template'

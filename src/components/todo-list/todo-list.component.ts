@@ -1,23 +1,34 @@
-export default class TodoListComponent extends HTMLElement {
-    #items
+import AbstractComponent from "../abstract.component";
+import {AddPrefix} from "../../shared.types";
+import {uid} from "../../utils";
+
+export type TodoListPropsNames = 'title'
+
+export type TodoListDataPropsNames = AddPrefix<TodoListPropsNames, 'data-'>
+
+export type TodoListProps = {
+    [T in TodoListPropsNames]: string
+}
+
+export type TodoListItem = {
+    text: string,
+    status: string,
+    id: string
+}
+
+export default class TodoListComponent extends AbstractComponent<TodoListProps> {
+    private _items: Array<TodoListItem>
+
+    private tasksContainer: null | HTMLElement;
 
     constructor() {
         super();
-        this.props = {}
         this.tasksContainer = null
-        this.#items = []
-        this.#init()
+        this._items = []
     }
 
-    #init() {
-        this.#setStyles()
-        this.#setProps()
-        this.#addHeader()
-        this.#addTasksContainer()
-        this.#addInput()
-    }
 
-    #setStyles() {
+    private setStyles() {
         this.style.cssText = `
             display: flex;
             flex-direction: column;
@@ -38,10 +49,6 @@ export default class TodoListComponent extends HTMLElement {
         this.append(this.tasksContainer)
     }
 
-    uid(){
-        return Math.random().toString().slice(2, 10)
-    }
-
     #addInput() {
         const fragment = document.createDocumentFragment()
         const input = document.createElement('input')
@@ -54,12 +61,11 @@ export default class TodoListComponent extends HTMLElement {
             e.preventDefault()
             const input = this?.['todo-input']
             const value = input?.value
-            const uid = self.uid()
             if (value)
                 self.add({
                     text: value,
                     status: 'TODO',
-                    id: uid
+                    id: uid()
                 })
             input.value = ''
         })
@@ -91,49 +97,48 @@ export default class TodoListComponent extends HTMLElement {
 
     }
 
-    #setProps() {
-        const props = {}
-        Object.entries(this.dataset).forEach(([key, value]) => {
-            props[key] = value
-        })
-        this.props = props
-    }
-
-    #render(items) {
+    override render(): void {
+        this.innerHTML = ''
+        this.#addHeader()
+        this.setStyles()
+        this.#addTasksContainer()
+        this.#addInput()
         const fragment = document.createDocumentFragment()
-        this.#items.forEach(listItem => {
+        this._items.forEach(listItem => {
             const li = document.createElement('todo-item')
-            this.#passProps(li, listItem)
+            this.passProps(li, listItem)
             fragment.append(li)
         })
-        this.tasksContainer.innerHTML = ''
-        this.tasksContainer.append(fragment)
+        if (this.tasksContainer) {
+            this.tasksContainer.innerHTML = ''
+            this.tasksContainer.append(fragment)
+        }
     }
 
-    #passProps(node, props) {
-        for (let key in props) {
-            if (props.hasOwnProperty(key))
-                node.setAttribute(`data-${key}`, props[key])
+    private passProps(node: HTMLElement, props: TodoListItem) {
+        let key: keyof TodoListItem
+        for (key in props) {
+            node.setAttribute(`data-${key}` as TodoListDataPropsNames, props[key])
         }
     }
 
     #addHeader() {
         const fragment = document.createDocumentFragment()
         const header = document.createElement('todo-heading')
-        header.setAttribute('data-title', this.props.title || '')
+        header.setAttribute('data-title', this.props?.title || '')
         fragment.append(header)
         this.append(fragment)
     }
 
-    #next(items) {
-        this.#items = items.map((item => {
-            item.id = (item.id) ? item.id : this.uid()
+    #next(items: Array<TodoListItem>) {
+        this._items = items.map((item => {
+            item.id = (item.id) ? item.id : uid()
             return item
         }))
-        this.#render()
+        this.render()
     }
 
-    set items(items) {
+    set items(items: Array<TodoListItem>) {
         this.#next(items)
     }
 
@@ -143,21 +148,21 @@ export default class TodoListComponent extends HTMLElement {
      * @property {string} item.id id of the component, generated automatically or can be passed
      * @returns {void}
      * */
-    add(item) {
-        this.#next([...this.#items, item])
+    add(item: TodoListItem) {
+        this.#next([...this._items, item])
     }
 
-    delete(id) {
-        const index = this.#items.findIndex((el) => el.id === id)
-        const items = this.#items.slice()
+    delete(id: string | number) {
+        const index = this._items.findIndex((el) => el.id === id)
+        const items = this._items.slice()
         items.splice(index, 1)
         this.#next(items)
     }
 
-    update(id, item) {
-        const index = this.#items.findIndex((el) => el.id === id)
+    update(id: string | number, item: TodoListItem) {
+        const index = this._items.findIndex((el) => el.id === id)
         this.#next(
-            this.#items.slice(0, index).concat(item).concat(this.#items.slice(index + 1, this.#items.length))
+            this._items.slice(0, index).concat(item).concat(this._items.slice(index + 1, this._items.length))
         )
     }
 
