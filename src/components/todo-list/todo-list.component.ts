@@ -6,6 +6,8 @@ export type TodoListPropsNames = 'title'
 
 export type TodoListDataPropsNames = AddPrefix<TodoListPropsNames, 'data-'>
 
+export type Test = AddPrefix<TodoListPropsNames>
+
 export type TodoListProps = {
     [T in TodoListPropsNames]: string
 }

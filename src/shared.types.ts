@@ -1,1 +1,1 @@
-export type AddPrefix<T extends string, P extends string> = P extends string ? `data-${T}` : T
+export type AddPrefix<T extends string, P = undefined> = P extends string ? `${P}${T}` : T
