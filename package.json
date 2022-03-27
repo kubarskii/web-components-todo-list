@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "node_modules/.bin/webpack"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^10.2.4",
     "html-loader": "^3.1.0",
+    "ts-loader": "^9.2.8",
     "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4"

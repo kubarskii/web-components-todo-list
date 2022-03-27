@@ -2,19 +2,24 @@ const CopyPlugin = require('copy-webpack-plugin')
 const path = require('path')
 
 const config = {
-    mode: 'production',
+    mode: 'development',
     entry: {
-        index: './src/index.js'
+        index: './src/index.ts'
     },
+    devtool: 'eval',
     resolve: {
-        extensions: ['.js']
+        extensions: ['.js', '.ts']
+    },
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
     },
     output: {
         filename: "index.js",
         path: path.resolve(__dirname, "dist"),
-        libraryTarget: "umd",
-        asyncChunks: true,
-        chunkFilename: '[id].js',
+        libraryTarget: "umd2",
+        chunkFilename: '[id].js'
     },
     devServer: {
         static: {
@@ -29,6 +34,10 @@ const config = {
                 test: /\.html$/i,
                 loader: "html-loader",
             },
+            {
+                test: /\.ts$/i,
+                loader: "ts-loader"
+            }
         ]
     },
     plugins: [
